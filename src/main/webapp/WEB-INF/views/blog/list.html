@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Blogs</title>
+</head>
+<body>
+<div sec:authorize="isAnonymous()">
+    <a th:href="@{/user}">Login</a>
+</div>
+<h3>
+    Welcome!
+    <div sec:authorize="isAuthenticated()">
+        <span sec:authentication="principal.username"></span>
+    </div>
+    <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+
+</h3>
+<h1>Blogs</h1>
+<form>
+    Search by name:
+    <input name="s" type="text"/>
+    <input type="submit" value="Search"/>
+</form>
+<br/>
+<ul th:each="category: ${categories}">
+    <li><a th:href="@{/detail-category/__${category.id}__}" th:text="${category.name}"></a></li>
+</ul>
+<div sec:authorize="isAuthenticated()">
+    <a href="/create-blog">Create new blog</a>
+</div>
+
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Detail</th>
+        <th sec:authorize="isAuthenticated()">Edit</th>
+        <th sec:authorize="isAuthenticated()">Delete</th>
+    </tr>
+    <th:block th:each="blog : ${blogList}">
+        <tr>
+            <td><a th:text="${blog.name}" th:href="@{/detail/__${blog.id}__}"></a></td>
+            <td th:text="${blog.category.name}"></td>
+            <td th:text="${#strings.substring(blog.detail, 0, 30)}"></td>
+            <td sec:authorize="hasRole('USER')"><a th:href="@{/edit-blog/__${blog.id}__}">Edit</a></td>
+            <td sec:authorize="hasRole('USER')"><a th:href="@{/delete-blog/__${blog.id}__}">Delete</a></td>
+        </tr>
+    </th:block>
+    <div>
+        <a th:href="@{'/blogs'(page=${blogList.number - 1})}" th:if="${blogList.hasPrevious()}">Previous</a>
+        <span th:text="${blogList.number+1}"></span>/<span th:text="${blogList.totalPages}"></span>
+        <a th:href="@{'blogs'(page=${blogList.number + 1})}" th:if="${blogList.hasNext()}">Next</a>
+    </div>
+</table>
+</body>
+</html>
